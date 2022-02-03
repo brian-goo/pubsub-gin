@@ -2,8 +2,8 @@ LOCAL_PORT = localhost:5000
 DEPLOY_PORT = :5000
 LOCAL_REDIS_ADDR = localhost:6379
 
-DEV_JWT_KEY = 8e6474daabc4f8c6881ccefdd5c4409b10094d8cb89658158a09da95dcb3f5f1
-DEV_JWT_ISSUER = https://kakeai.com
+DEV_JWT_KEY = test
+DEV_JWT_ISSUER = https://example.com
 
 AUTH0_ISS_DEV = 
 AUTH0_AUD_DEV = 
