@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
@@ -13,13 +14,18 @@ import (
 
 var (
 	Rd       *redis.Client
-	upgrader = websocket.Upgrader{}
-	ctx      = context.Background()
+	upgrader = websocket.Upgrader{
+		CheckOrigin:      func(r *http.Request) bool { return true },
+		HandshakeTimeout: 3 * time.Second,
+	}
+	ctx = context.Background() // move this into func ws?
 )
 
 // should handle more errors
 // deadlock condition?
-func ws(w http.ResponseWriter, r *http.Request) {
+func ws(w http.ResponseWriter, r *http.Request, c *gin.Context) {
+	log.Println(c.GetString("user"))
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("websocket connection err:", err)
@@ -90,5 +96,5 @@ func ws(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetWs(c *gin.Context) {
-	ws(c.Writer, c.Request)
+	ws(c.Writer, c.Request, c)
 }

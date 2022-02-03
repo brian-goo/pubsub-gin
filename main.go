@@ -22,8 +22,7 @@ func main() {
 
 	r := gin.Default()
 	r.Use(mdw.CORS())
-	// r.Use(mdw.AuthAPIKey())
-	// r.Use(mdw.Auth0())
+	r.Use(mdw.JwtAuth())
 
 	router(r)
 
