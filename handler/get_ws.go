@@ -38,7 +38,9 @@ type M struct {
 // should handle more errors
 // deadlock condition?
 func ws(w http.ResponseWriter, r *http.Request, c *gin.Context) {
-	log.Println(c.GetString("user"))
+	// userUuid := c.GetString("user")
+	userUuid := "me"
+	log.Println(userUuid)
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -74,10 +76,15 @@ func ws(w http.ResponseWriter, r *http.Request, c *gin.Context) {
 					start <- "ok"
 				case msg := <-sub.Channel():
 					log.Println("msg", msg)
-					err := conn.WriteMessage(websocket.TextMessage, []byte(msg.Payload))
-					if err != nil {
-						log.Println("websocket write err:", err)
-						break loop
+					b := []byte(msg.Payload)
+					if m, err := decodeToMsg(&b); err == nil {
+						if m.Message.FromUserUuid != userUuid {
+							err := conn.WriteMessage(websocket.TextMessage, []byte(msg.Payload))
+							if err != nil {
+								log.Println("websocket write err:", err)
+								break loop
+							}
+						}
 					}
 				}
 			}
