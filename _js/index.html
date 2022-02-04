@@ -7,22 +7,39 @@
 </head>
 <body>
     <script>
-        // const ws = new WebSocket('ws://localhost:5000/ws')
-        const ws = new WebSocket('ws://localhost:5000/ws?wskey=eyJhbGciOiJIUzI1NiJ9.eyJpZCI6InVzZXIwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMyIsImV4cCI6MTY0Mzg4MDI5MCwiaXNzIjoiaHR0cHM6Ly9rYWtlYWkuY29tIn0.zCo029YfoJjknJZcMkXaSG8Q6IDERz4t3ujuEnuuvsw')
+        const ws = new WebSocket('ws://localhost:5000/ws')
+        // const ws = new WebSocket('ws://localhost:5000/ws?wskey=eyJhbGciOiJIUzI1NiJ9.eyJpZCI6InVzZXIwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMyIsImV4cCI6MTY0Mzg4MDI5MCwiaXNzIjoiaHR0cHM6Ly9rYWtlYWkuY29tIn0.zCo029YfoJjknJZcMkXaSG8Q6IDERz4t3ujuEnuuvsw')
+        // const ws = new WebSocket('ws://localhost:5000/ws', "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6InVzZXIwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMyIsImV4cCI6MTY0Mzg4MDI5MCwiaXNzIjoiaHR0cHM6Ly9rYWtlYWkuY29tIn0.zCo029YfoJjknJZcMkXaSG8Q6IDERz4t3ujuEnuuvsw")
 
+        const initT = {
+            initChannel: 'test-channel'
+        }
+        const msgT = {
+            channel: 'test-channel',
+            message: {
+                type: 'type',
+                fromUserUuid: 'uuid',
+                content: {
+                    id: 1
+                }
+            }
+        }
+
+        const encode = ob => JSON.stringify(ob)
+        
         ws.onopen = e => {
             console.log('open')
-            ws.send('test')
+            ws.send(encode(initT))
             setTimeout(() => {
-                ws.send(`test:hello from clent ${new Date().getTime()}`)
+                ws.send(encode(msgT))
             }, 200);
 
-            setTimeout(() => {
-                ws.send('yeah')
-            }, 1000);
-            setTimeout(() => {
-                ws.send(`yeah:hello from clent ${new Date().getTime()}`)
-            }, 1200);
+            // setTimeout(() => {
+            //     ws.send('yeah')
+            // }, 1000);
+            // setTimeout(() => {
+            //     ws.send(`yeah:hello from clent ${new Date().getTime()}`)
+            // }, 1200);
         }
         ws.onclose = e => {
             console.log('close')

@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +19,21 @@ var (
 	}
 	ctx = context.Background() // move this into func ws?
 )
+
+type ChInit struct {
+	InitChannel string `json:"initChannel"`
+}
+
+type Msg struct {
+	Channel string `json:"channel"`
+	Message M      `json:"message"`
+}
+
+type M struct {
+	Type         string                 `json:"type"`
+	FromUserUuid string                 `json:"fromUserUuid"`
+	Content      map[string]interface{} `json:"content"`
+}
 
 // should handle more errors
 // deadlock condition?
@@ -79,18 +93,26 @@ func ws(w http.ResponseWriter, r *http.Request, c *gin.Context) {
 		}
 		log.Println(string(msg))
 
-		chPrefix := strings.Split(string(msg), ":")[0]
-		ch := chPrefix + "-channel"
-		if string(msg) == "test" || string(msg) == "yeah" {
-			room <- ch
-			log.Println(ch)
-			log.Println(<-start)
+		// chPrefix := strings.Split(string(msg), ":")[0]
+		// ch := chPrefix + "-channel"
+		// if string(msg) == "test" || string(msg) == "yeah" {
+		// 	room <- ch
+		// 	log.Println(ch)
+		// 	log.Println(<-start)
+		// }
+
+		if ch, err := decodeToChInit(&msg); err == nil && ch.InitChannel != "" {
+			room <- ch.InitChannel
+			<-start
+		} else if m, err := decodeToMsg(&msg); err == nil {
+			if err := Rd.Publish(ctx, m.Channel, msg).Err(); err != nil {
+				log.Println("redis publish err:", err)
+				break
+			}
+		} else {
+			log.Println("unknown message type")
 		}
 
-		if err := Rd.Publish(ctx, ch, msg).Err(); err != nil {
-			log.Println("redis publish err:", err)
-			break
-		}
 	}
 
 }
