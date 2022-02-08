@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,20 +32,39 @@ func setResponse(c *gin.Context, res interface{}) {
 // 	return data, nil
 // }
 
-func decodeToChInit(i *[]byte) (*ChInit, error) {
-	var chInit ChInit
-	err := json.Unmarshal(*i, &chInit)
-	if err != nil {
-		return &chInit, err
+func decode(i *[]byte, t interface{}) (*ChInit, *Msg, error) {
+	switch tp := t.(type) {
+	case ChInit:
+		err := json.Unmarshal(*i, &tp)
+		if err != nil {
+			return &tp, &Msg{}, err
+		}
+		return &tp, &Msg{}, nil
+	case Msg:
+		err := json.Unmarshal(*i, &tp)
+		if err != nil {
+			return &ChInit{}, &tp, err
+		}
+		return &ChInit{}, &tp, nil
+	default:
+		return &ChInit{}, &Msg{}, errors.New("decode error for message")
 	}
-	return &chInit, nil
 }
 
-func decodeToMsg(i *[]byte) (*Msg, error) {
-	var msg Msg
-	err := json.Unmarshal(*i, &msg)
-	if err != nil {
-		return &msg, err
-	}
-	return &msg, nil
-}
+// func decodeToChInit(i *[]byte) (*ChInit, error) {
+// 	var chInit ChInit
+// 	err := json.Unmarshal(*i, &chInit)
+// 	if err != nil {
+// 		return &chInit, err
+// 	}
+// 	return &chInit, nil
+// }
+
+// func decodeToMsg(i *[]byte) (*Msg, error) {
+// 	var msg Msg
+// 	err := json.Unmarshal(*i, &msg)
+// 	if err != nil {
+// 		return &msg, err
+// 	}
+// 	return &msg, nil
+// }

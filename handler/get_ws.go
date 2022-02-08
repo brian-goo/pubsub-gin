@@ -77,7 +77,7 @@ func ws(w http.ResponseWriter, r *http.Request, c *gin.Context) {
 				case msg := <-sub.Channel():
 					log.Println("msg", msg)
 					b := []byte(msg.Payload)
-					if m, err := decodeToMsg(&b); err == nil {
+					if _, m, err := decode(&b, Msg{}); err == nil {
 						if m.Message.FromUserUuid != userUuid {
 							err := conn.WriteMessage(websocket.TextMessage, []byte(msg.Payload))
 							if err != nil {
@@ -100,18 +100,10 @@ func ws(w http.ResponseWriter, r *http.Request, c *gin.Context) {
 		}
 		log.Println(string(msg))
 
-		// chPrefix := strings.Split(string(msg), ":")[0]
-		// ch := chPrefix + "-channel"
-		// if string(msg) == "test" || string(msg) == "yeah" {
-		// 	room <- ch
-		// 	log.Println(ch)
-		// 	log.Println(<-start)
-		// }
-
-		if ch, err := decodeToChInit(&msg); err == nil && ch.InitChannel != "" {
+		if ch, _, err := decode(&msg, ChInit{}); err == nil && ch.InitChannel != "" {
 			room <- ch.InitChannel
 			<-start
-		} else if m, err := decodeToMsg(&msg); err == nil {
+		} else if _, m, err := decode(&msg, Msg{}); err == nil {
 			if err := Rd.Publish(ctx, m.Channel, msg).Err(); err != nil {
 				log.Println("redis publish err:", err)
 				break
