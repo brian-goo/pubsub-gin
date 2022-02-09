@@ -17,6 +17,16 @@ var Rd = redis.NewClient(&redis.Options{
 })
 
 func main() {
+	// p := "_log/dev.log"
+	// os.MkdirAll(filepath.Dir(p), 0777)
+	// f, err := os.Create(p)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// gin.DefaultWriter = io.MultiWriter(f)
+	// log.SetOutput(f)
+	// defer f.Close()
+
 	// handle redis conn err
 	handler.Rd = Rd
 

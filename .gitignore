@@ -1,3 +1,4 @@
 out/
 _log/
 .DS_Store
+*.log
