@@ -55,7 +55,7 @@ func ws(w http.ResponseWriter, r *http.Request, c *gin.Context) {
 	go func() {
 	loop:
 		for {
-			sub := Rd.Subscribe(ctx)
+			sub := Rd.PSubscribe(ctx, "*channel*")
 			// subCh := sub.Channel()
 			defer sub.Close()
 
@@ -66,13 +66,19 @@ func ws(w http.ResponseWriter, r *http.Request, c *gin.Context) {
 				case channel := <-room:
 					log.Println("channel", channel)
 					channels = append(channels, channel)
-					sub = Rd.Subscribe(ctx, channels...)
+					// sub = Rd.Subscribe(ctx, channels...)
 					log.Println("channels", channels)
 					// _, err := sub.Receive(ctx)
 					// if err != nil {
 					// 	log.Println("redis sub connection err:", err)
 					// 	break loop
 					// }
+					err := conn.WriteMessage(websocket.TextMessage, []byte(`{"status": "ok"}`))
+					if err != nil {
+						log.Println("websocket write err:", err)
+						start <- "ok"
+						break loop
+					}
 					start <- "ok"
 				case msg := <-sub.Channel():
 					log.Println("msg", msg)
