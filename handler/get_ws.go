@@ -52,6 +52,8 @@ func ws(w http.ResponseWriter, r *http.Request, c *gin.Context) {
 	room := make(chan string)
 	start := make(chan string)
 
+	var messageInit ChInit
+
 	go func() {
 	loop:
 		for {
@@ -106,9 +108,12 @@ func ws(w http.ResponseWriter, r *http.Request, c *gin.Context) {
 		}
 		log.Println(string(msg))
 
-		if ch, _, err := decode(&msg, ChInit{}); err == nil && ch.InitChannel != "" {
-			room <- ch.InitChannel
-			<-start
+		// there should be way to tell whether json is parsed when err == nil
+		if m, err := messageInit.decode(&msg); err == nil && m.(*ChInit).InitChannel != "" {
+			if ch, ok := m.(*ChInit); ok && ch.InitChannel != "" {
+				room <- ch.InitChannel
+				<-start
+			}
 		} else if _, m, err := decode(&msg, Msg{}); err == nil {
 			if err := Rd.Publish(ctx, m.Channel, msg).Err(); err != nil {
 				log.Println("redis publish err:", err)

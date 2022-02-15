@@ -32,6 +32,22 @@ func setResponse(c *gin.Context, res interface{}) {
 // 	return data, nil
 // }
 
+type PubSubIO interface {
+	decode(i *[]byte) (PubSubIO, error)
+}
+
+func decodeJSON(i *[]byte, ps PubSubIO) (PubSubIO, error) {
+	err := json.Unmarshal(*i, ps)
+	if err != nil {
+		return ps, err
+	}
+	return ps, nil
+}
+
+func (m ChInit) decode(i *[]byte) (PubSubIO, error) {
+	return decodeJSON(i, &m)
+}
+
 func decode(i *[]byte, t interface{}) (*ChInit, *Msg, error) {
 	switch tp := t.(type) {
 	case ChInit:
